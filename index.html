@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Игра в кости — 2 игрока</title>
-  <!-- Bootstrap 5 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     .dice-cell {
@@ -50,6 +49,11 @@
     .btn-custom {
       margin: 10px;
     }
+    .column-score {
+      font-size: 0.9rem;
+      color: #6c757d;
+      margin-top: -8px;
+    }
   </style>
 </head>
 <body class="bg-light">
@@ -73,15 +77,20 @@
           <p>Очки: <span id="score-1">0</span></p>
         </div>
         <div class="board" id="board-1">
-          <div class="dice-cell" data-player="1" data-cell="0"></div>
-          <div class="dice-cell" data-player="1" data-cell="1"></div>
-          <div class="dice-cell" data-player="1" data-cell="2"></div>
-          <div class="dice-cell" data-player="1" data-cell="3"></div>
-          <div class="dice-cell" data-player="1" data-cell="4"></div>
-          <div class="dice-cell" data-player="1" data-cell="5"></div>
-          <div class="dice-cell" data-player="1" data-cell="6"></div>
-          <div class="dice-cell" data-player="1" data-cell="7"></div>
-          <div class="dice-cell" data-player="1" data-cell="8"></div>
+          <div class="dice-cell" data-player="1" data-col="0" data-row="0"></div>
+          <div class="dice-cell" data-player="1" data-col="1" data-row="0"></div>
+          <div class="dice-cell" data-player="1" data-col="2" data-row="0"></div>
+          <div class="dice-cell" data-player="1" data-col="0" data-row="1"></div>
+          <div class="dice-cell" data-player="1" data-col="1" data-row="1"></div>
+          <div class="dice-cell" data-player="1" data-col="2" data-row="1"></div>
+          <div class="dice-cell" data-player="1" data-col="0" data-row="2"></div>
+          <div class="dice-cell" data-player="1" data-col="1" data-row="2"></div>
+          <div class="dice-cell" data-player="1" data-col="2" data-row="2"></div>
+        </div>
+        <div class="text-center">
+          <small class="column-score" id="col-1-0"></small>
+          <small class="column-score" id="col-1-1"></small>
+          <small class="column-score" id="col-1-2"></small>
         </div>
       </div>
 
@@ -92,15 +101,20 @@
           <p>Очки: <span id="score-2">0</span></p>
         </div>
         <div class="board" id="board-2">
-          <div class="dice-cell" data-player="2" data-cell="0"></div>
-          <div class="dice-cell" data-player="2" data-cell="1"></div>
-          <div class="dice-cell" data-player="2" data-cell="2"></div>
-          <div class="dice-cell" data-player="2" data-cell="3"></div>
-          <div class="dice-cell" data-player="2" data-cell="4"></div>
-          <div class="dice-cell" data-player="2" data-cell="5"></div>
-          <div class="dice-cell" data-player="2" data-cell="6"></div>
-          <div class="dice-cell" data-player="2" data-cell="7"></div>
-          <div class="dice-cell" data-player="2" data-cell="8"></div>
+          <div class="dice-cell" data-player="2" data-col="0" data-row="0"></div>
+          <div class="dice-cell" data-player="2" data-col="1" data-row="0"></div>
+          <div class="dice-cell" data-player="2" data-col="2" data-row="0"></div>
+          <div class="dice-cell" data-player="2" data-col="0" data-row="1"></div>
+          <div class="dice-cell" data-player="2" data-col="1" data-row="1"></div>
+          <div class="dice-cell" data-player="2" data-col="2" data-row="1"></div>
+          <div class="dice-cell" data-player="2" data-col="0" data-row="2"></div>
+          <div class="dice-cell" data-player="2" data-col="1" data-row="2"></div>
+          <div class="dice-cell" data-player="2" data-col="2" data-row="2"></div>
+        </div>
+        <div class="text-center">
+          <small class="column-score" id="col-2-0"></small>
+          <small class="column-score" id="col-2-1"></small>
+          <small class="column-score" id="col-2-2"></small>
         </div>
       </div>
     </div>
@@ -111,7 +125,6 @@
     </div>
   </div>
 
-  <!-- JavaScript -->
   <script>
     let currentPlayer = 1;
     let diceValue = null;
@@ -124,91 +137,146 @@
 
     // Бросок кубика
     rollButton.addEventListener('click', () => {
+      if (isGameOver()) return;
+
       diceValue = Math.floor(Math.random() * 6) + 1;
       diceElement.textContent = diceValue;
-      rollButton.disabled = true; // Запрещаем повторный бросок до выбора ячейки
+      rollButton.disabled = true;
     });
 
-    // Обработка клика по ячейке
+    // Обработка клика по ячейке — игрок выбирает **столбец** (любая ячейка в столбце)
     document.querySelectorAll('.dice-cell').forEach(cell => {
       cell.addEventListener('click', () => {
-        const player = parseInt(cell.dataset.player);
-        if (player !== currentPlayer || diceValue === null || cell.classList.contains('filled')) return;
+        if (diceValue === null || rollButton.disabled === false) return;
 
-        cell.textContent = diceValue;
-        cell.classList.add('filled');
-        cell.style.backgroundColor = currentPlayer === 1 ? '#d1ecf1' : '#f8d7da';
+        const player = parseInt(cell.dataset.player);
+        const col = parseInt(cell.dataset.col);
+        if (player !== currentPlayer) return;
+
+        const columnCells = document.querySelectorAll(`.dice-cell[data-player="${player}"][data-col="${col}"]`);
+        const filledCount = Array.from(columnCells).filter(c => c.classList.contains('filled')).length;
+
+        if (filledCount >= 3) {
+          alert('Этот столбец уже заполнен!');
+          return;
+        }
+
+        // Найти первую пустую ячейку в столбце (снизу вверх)
+        let targetCell = null;
+        for (let row = 2; row >= 0; row--) {
+          const cellInCol = document.querySelector(`.dice-cell[data-player="${player}"][data-col="${col}"][data-row="${row}"]`);
+          if (!cellInCol.classList.contains('filled')) {
+            targetCell = cellInCol;
+            break;
+          }
+        }
+
+        if (!targetCell) return;
+
+        // Установить значение
+        targetCell.textContent = diceValue;
+        targetCell.classList.add('filled');
+        targetCell.style.backgroundColor = currentPlayer === 1 ? '#d1ecf1' : '#f8d7da';
+
+        // Удалить все кости такого же значения в противоположном столбце
+        const opponent = currentPlayer === 1 ? 2 : 1;
+        const opponentCells = document.querySelectorAll(`.dice-cell[data-player="${opponent}"][data-col="${col}"]`);
+        opponentCells.forEach(opCell => {
+          if (opCell.textContent == diceValue) {
+            opCell.textContent = '';
+            opCell.classList.remove('filled');
+            opCell.style.backgroundColor = '';
+          }
+        });
 
         // Переключение игрока
-        currentPlayer = currentPlayer === 1 ? 2 : 1;
+        currentPlayer = opponent;
         currentPlayerDisplay.textContent = `Ход: Игрок ${currentPlayer}`;
         diceElement.textContent = '?';
         diceValue = null;
         rollButton.disabled = false;
 
-        // Подсчёт очков
+        // Обновить очки
         updateScore();
+
+        // Проверка окончания игры
+        if (isBoardFull(1) || isBoardFull(2)) {
+          setTimeout(() => {
+            const s1 = parseInt(score1.textContent);
+            const s2 = parseInt(score2.textContent);
+            let result = `Игра окончена!\nИгрок 1: ${s1}\nИгрок 2: ${s2}\n`;
+            if (s1 > s2) result += "Победил: Игрок 1!";
+            else if (s2 > s1) result += "Победил: Игрок 2!";
+            else result += "Ничья!";
+            alert(result);
+          }, 100);
+        }
       });
     });
 
-    // Подсчёт очков: просто суммируем все значения
-function updateScore() {
-  let sum1 = 0, sum2 = 0;
+    // Подсчёт очков по столбцам
+    function updateScore() {
+      let total1 = 0, total2 = 0;
 
-  // Столбцы: 0,1,2 → три столбца
-  for (let col = 0; col < 3; col++) {
-    const indices = [col, col + 3, col + 6]; // ячейки в столбце
+      for (let col = 0; col < 3; col++) {
+        // Столбец Игрока 1
+        const cells1 = Array.from(document.querySelectorAll(`.dice-cell[data-player="1"][data-col="${col}"]`))
+          .map(c => c.textContent ? parseInt(c.textContent) : 0)
+          .filter(val => val > 0);
 
-    // Подсчёт для Игрока 1
-    const values1 = indices.map(i => {
-      const cell = document.querySelector(`.dice-cell[data-player="1"][data-cell="${i}"]`);
-      return cell.textContent ? parseInt(cell.textContent) : 0;
-    });
-    sum1 += calculateColumnScore(values1);
+        const score1Col = calculateColumnScore(cells1);
+        total1 += score1Col;
+        document.getElementById(`col-1-${col}`).textContent = `(${score1Col})`;
 
-    // Подсчёт для Игрока 2
-    const values2 = indices.map(i => {
-      const cell = document.querySelector(`.dice-cell[data-player="2"][data-cell="${i}"]`);
-      return cell.textContent ? parseInt(cell.textContent) : 0;
-    });
-    sum2 += calculateColumnScore(values2);
-  }
+        // Столбец Игрока 2
+        const cells2 = Array.from(document.querySelectorAll(`.dice-cell[data-player="2"][data-col="${col}"]`))
+          .map(c => c.textContent ? parseInt(c.textContent) : 0)
+          .filter(val => val > 0);
 
-  score1.textContent = sum1;
-  score2.textContent = sum2;
+        const score2Col = calculateColumnScore(cells2);
+        total2 += score2Col;
+        document.getElementById(`col-2-${col}`).textContent = `(${score2Col})`;
+      }
 
-  // Проверка окончания игры
-  if (isBoardFull(1) && isBoardFull(2)) {
-    setTimeout(() => {
-      alert(`Игра окончена!\nИгрок 1: ${sum1}\nИгрок 2: ${sum2}\nПобедил: ${sum1 > sum2 ? 'Игрок 1' : sum2 > sum1 ? 'Игрок 2' : 'Ничья'}`);
-    }, 100);
-  }
-}
+      score1.textContent = total1;
+      score2.textContent = total2;
+    }
 
-// Вспомогательная функция: считает очки за один столбец
-function calculateColumnScore(values) {
-  const count = {};
-  let total = 0;
+    // Подсчёт очков за один столбец
+    function calculateColumnScore(values) {
+      if (values.length === 0) return 0;
 
-  // Считаем количество каждого числа
-  values.forEach(val => {
-    if (val > 0) count[val] = (count[val] || 0) + 1;
-  });
+      const counts = {};
+      values.forEach(v => counts[v] = (counts[v] || 0) + 1);
 
-  // Для каждого уникального числа: сумма * количество
-  for (const num in count) {
-    const cnt = count[num];
-    const sum = parseInt(num) * cnt; // сумма одинаковых
-    total += sum * cnt; // умножаем сумму на количество
-  }
+      let total = 0;
+      for (const numStr in counts) {
+        const num = parseInt(numStr);
+        const count = counts[num];
+        const sum = num * count;
+        if (count === 2) {
+          total += sum * 2; // (N+N)*2
+        } else if (count === 3) {
+          total += sum * 3; // (N+N+N)*3
+        } else {
+          total += sum; // просто сумма
+        }
+      }
+      return total;
+    }
 
-  return total;
-}
-
-    // Проверка заполненности поля
+    // Проверка, заполнена ли доска (все 3 столбца имеют по 3 кости)
     function isBoardFull(player) {
-      return Array.from(document.querySelectorAll(`.dice-cell[data-player="${player}"]`))
-        .every(cell => cell.classList.contains('filled'));
+      for (let col = 0; col < 3; col++) {
+        const cells = document.querySelectorAll(`.dice-cell[data-player="${player}"][data-col="${col}"].filled`);
+        if (cells.length < 3) return false;
+      }
+      return true;
+    }
+
+    // Проверка окончания игры
+    function isGameOver() {
+      return isBoardFull(1) || isBoardFull(2);
     }
 
     // Сброс игры
@@ -218,6 +286,8 @@ function calculateColumnScore(values) {
         cell.classList.remove('filled');
         cell.style.backgroundColor = '';
       });
+      document.querySelectorAll('.column-score').forEach(el => el.textContent = '');
+
       diceElement.textContent = '?';
       currentPlayer = 1;
       currentPlayerDisplay.textContent = 'Ход: Игрок 1';
@@ -227,6 +297,5 @@ function calculateColumnScore(values) {
       score2.textContent = '0';
     });
   </script>
-
 </body>
 </html>
