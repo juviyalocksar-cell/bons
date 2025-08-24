@@ -63,34 +63,33 @@
 
 
     .dice-display {
-  width: 64px;
-  height: 64px;
-  margin: 20px auto;
-  border: 2px solid var(--border);
-  border-radius: 50%;
-  background-color: var(--surface);
-  box-shadow: 0 4px 10px rgba(139, 111, 80, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  position: relative;
-}
+      width: 64px;
+      height: 64px;
+      margin: 20px auto;
+      border: 2px solid var(--border);
+      border-radius: 50%;
+      background-color: var(--surface);
+      box-shadow: 0 4px 10px rgba(139, 111, 80, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+  }
 
-.dice-display img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain; /* или 'cover', если хочешь заполнить полностью */
-  pointer-events: none;
-}
-
-.dice-display::after {
-  content: attr(data-text);
-  font-size: 2rem;
-  font-weight: bold;
-  color: var(--text-deep);
-  display: block;
-}
+    .dice-display img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain; /* или 'cover', если хочешь заполнить полностью */
+      pointer-events: none;
+    }
+    
+    .dice-display::after {
+      content: attr(data-text);
+      font-size: 2rem;
+      font-weight: bold;
+      color: var(--text-deep);
+      display: block;
+    }
     
     @keyframes pulse {
       0%, 100% { transform: scale(1); }
