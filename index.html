@@ -61,6 +61,10 @@
       animation: pulse 0.8s ease-in-out;
     }
 
+    .dice-display.img {
+      style="width: 64px;"
+    }
+
     @keyframes pulse {
       0%, 100% { transform: scale(1); }
       50% { transform: scale(1.1); }
@@ -203,7 +207,7 @@
     <!-- Текущий ход -->
     <div class="text-center mb-4">
       <p class="current-player" id="current-player">Ход: Игрок 1</p>
-      <div class="dice-display" style="width: 64px;" id="dice">?</div>
+      <div class="dice-display" id="dice">?</div>
       <button class="btn btn-success btn-lg mt-2" id="roll-btn">Бросить кубик</button>
     </div>
 
