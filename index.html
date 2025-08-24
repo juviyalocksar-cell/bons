@@ -152,22 +152,58 @@
     });
 
     // Подсчёт очков: просто суммируем все значения
-    function updateScore() {
-      let sum1 = 0, sum2 = 0;
-      document.querySelectorAll('.dice-cell[data-player="1"]').forEach(cell => {
-        if (cell.textContent) sum1 += parseInt(cell.textContent);
-      });
-      document.querySelectorAll('.dice-cell[data-player="2"]').forEach(cell => {
-        if (cell.textContent) sum2 += parseInt(cell.textContent);
-      });
-      score1.textContent = sum1;
-      score2.textContent = sum2;
+function updateScore() {
+  let sum1 = 0, sum2 = 0;
 
-      // Проверка окончания игры
-      if (sum1 > 0 && sum2 > 0 && isBoardFull(1) && isBoardFull(2)) {
-        alert(`Игра окончена!\nИгрок 1: ${sum1}\nИгрок 2: ${sum2}\nПобедил: ${sum1 > sum2 ? 'Игрок 1' : sum2 > sum1 ? 'Игрок 2' : 'Ничья'}`);
-      }
-    }
+  // Столбцы: 0,1,2 → три столбца
+  for (let col = 0; col < 3; col++) {
+    const indices = [col, col + 3, col + 6]; // ячейки в столбце
+
+    // Подсчёт для Игрока 1
+    const values1 = indices.map(i => {
+      const cell = document.querySelector(`.dice-cell[data-player="1"][data-cell="${i}"]`);
+      return cell.textContent ? parseInt(cell.textContent) : 0;
+    });
+    sum1 += calculateColumnScore(values1);
+
+    // Подсчёт для Игрока 2
+    const values2 = indices.map(i => {
+      const cell = document.querySelector(`.dice-cell[data-player="2"][data-cell="${i}"]`);
+      return cell.textContent ? parseInt(cell.textContent) : 0;
+    });
+    sum2 += calculateColumnScore(values2);
+  }
+
+  score1.textContent = sum1;
+  score2.textContent = sum2;
+
+  // Проверка окончания игры
+  if (isBoardFull(1) && isBoardFull(2)) {
+    setTimeout(() => {
+      alert(`Игра окончена!\nИгрок 1: ${sum1}\nИгрок 2: ${sum2}\nПобедил: ${sum1 > sum2 ? 'Игрок 1' : sum2 > sum1 ? 'Игрок 2' : 'Ничья'}`);
+    }, 100);
+  }
+}
+
+// Вспомогательная функция: считает очки за один столбец
+function calculateColumnScore(values) {
+  const count = {};
+  let total = 0;
+
+  // Считаем количество каждого числа
+  values.forEach(val => {
+    if (val > 0) count[val] = (count[val] || 0) + 1;
+  });
+
+  // Для каждого уникального числа: сумма * количество
+  for (const num in count) {
+    const cnt = count[num];
+    const sum = parseInt(num) * cnt; // сумма одинаковых
+    total += sum * cnt; // умножаем сумму на количество
+  }
+
+  return total;
+}
 
     // Проверка заполненности поля
     function isBoardFull(player) {
