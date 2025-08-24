@@ -3,170 +3,253 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Игра в кости — 2 игрока</title>
+  <title>🎲 Игра в кости — 2 игрока</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
+    :root {
+      --dark-bg: #130e0c;
+      --dark-secondary: #2b0202;
+      --red-dark: #490404;
+      --red-medium: #8e0d0c;
+      --red-light: #cd1814;
+      --text-light: #f8f9fa;
+      --border: #6a0707;
+      --shadow: rgba(106, 7, 7, 0.3);
+    }
+
+    body {
+      background-color: var(--dark-bg);
+      color: var(--text-light);
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 1rem;
+      border-radius: 16px;
+      background-color: var(--dark-secondary);
+      box-shadow: 0 10px 30px var(--shadow);
+    }
+
+    h1 {
+      color: var(--red-light);
+      text-shadow: 0 0 10px rgba(205, 24, 20, 0.7);
+      letter-spacing: 1px;
+    }
+
+    .dice-display {
+      font-size: 3rem;
+      font-weight: bold;
+      color: var(--red-light);
+      text-shadow: 0 0 10px rgba(205, 24, 20, 0.7);
+      transition: all 0.3s ease;
+    }
+
+    .dice-display.animate {
+      animation: pulse 0.8s ease-in-out;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    .btn-success {
+      background-color: var(--red-light);
+      border-color: var(--red-medium);
+      color: white;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+
+    .btn-success:hover {
+      background-color: #e02c2c;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(205, 24, 20, 0.5);
+    }
+
+    .btn-warning {
+      background-color: #8e0d0c;
+      border-color: #6a0707;
+      color: white;
+      font-weight: bold;
+    }
+
+    .btn-warning:hover {
+      background-color: #a61616;
+      transform: translateY(-2px);
+    }
+
     .dice-cell {
       width: 60px;
       height: 60px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.5rem;
-      border: 2px solid #dee2e6;
-      border-radius: 8px;
-      background-color: #f8f9fa;
+      font-size: 1.8rem;
+      font-weight: bold;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      background-color: var(--dark-secondary);
       margin: 4px;
       cursor: pointer;
-      transition: all 0.2s;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 0 0 1px rgba(0,0,0,0.3);
     }
-    .dice-cell:hover {
-      background-color: #e9ecef;
+
+    .dice-cell:hover:not(.filled) {
+      background-color: #3b0707;
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(205, 24, 20, 0.3);
     }
+
     .dice-cell.filled {
-      background-color: #d1ecf1;
-      border-color: #bee5eb;
+      background-color: var(--red-dark);
+      border-color: var(--red-medium);
+      color: white;
+      box-shadow: 0 0 15px rgba(205, 24, 20, 0.5);
+      transform: scale(1.02);
     }
+
+    .dice-cell.filled.animate {
+      animation: slideIn 0.4s forwards;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
     .board {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 4px;
       padding: 16px;
-      border: 1px solid #dee2e6;
-      border-radius: 12px;
-      background-color: white;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      background-color: var(--dark-secondary);
+      box-shadow: 0 6px 20px var(--shadow);
     }
+
     .player-info {
       text-align: center;
       margin-bottom: 12px;
     }
-    .dice-display {
-      font-size: 2rem;
-      font-weight: bold;
-      margin: 20px 0;
+
+    .player-info h4 {
+      color: var(--red-light);
+      margin-bottom: 5px;
     }
+
+    .column-score {
+      font-size: 0.8rem;
+      color: #c74545;
+      margin-top: -8px;
+      font-weight: bold;
+    }
+
+    .current-player {
+      color: var(--red-light);
+      font-size: 1.1rem;
+    }
+
     .btn-custom {
       margin: 10px;
     }
-    .column-score {
-      font-size: 0.9rem;
-      color: #6c757d;
-      margin-top: -8px;
+
+    /* Эффект "удаление" */
+    .remove-animation {
+      animation: remove 0.4s forwards;
     }
 
-    /* Контейнер для масштабирования */
-    #game-container {
-      transform-origin: top center;
-      transition: transform 0.2s ease;
-      display: inline-block;
-      margin: 0 auto;
+    @keyframes remove {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.2); opacity: 0.5; }
+      100% { transform: scale(0); opacity: 0; }
     }
 
-    /* Ползунок зума */
-    .zoom-controls {
-      text-align: center;
-      margin-top: 20px;
-      padding: 10px;
-      background-color: #f8f9fa;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
-
-    .zoom-controls label {
-      margin-right: 10px;
-      font-weight: bold;
-    }
-
-    .zoom-controls input[type="range"] {
-      width: 200px;
-      vertical-align: middle;
-    }
-
-    .zoom-value {
-      display: inline-block;
-      width: 50px;
-      font-weight: bold;
-      color: #007bff;
+    /* Подсветка активного столбца */
+    .active-column {
+      background-color: rgba(205, 24, 20, 0.1) !important;
+      border-color: var(--red-light) !important;
     }
   </style>
 </head>
-<body class="bg-light">
+<body>
 
   <div class="container py-5">
     <h1 class="text-center mb-4">🎲 Игра в кости — 2 игрока</h1>
 
-    <!-- Контейнер с масштабируемым содержимым -->
-    <div id="game-container">
-      <!-- Текущий ход -->
-      <div class="text-center mb-4">
-        <p class="current-player" id="current-player">Ход: Игрок 1</p>
-        <div class="dice-display" id="dice">?</div>
-        <button class="btn btn-success btn-lg mt-2" id="roll-btn">Бросить кубик</button>
-      </div>
+    <!-- Текущий ход -->
+    <div class="text-center mb-4">
+      <p class="current-player" id="current-player">Ход: Игрок 1</p>
+      <div class="dice-display" id="dice">?</div>
+      <button class="btn btn-success btn-lg mt-2" id="roll-btn">Бросить кубик</button>
+    </div>
 
-      <!-- Поля игроков -->
-      <div class="row justify-content-center gap-4">
-        <!-- Поле Игрока 1 -->
-        <div class="col-md-4">
-          <div class="player-info">
-            <h4>Игрок 1</h4>
-            <p>Очки: <span id="score-1">0</span></p>
-          </div>
-          <div class="board" id="board-1">
-            <div class="dice-cell" data-player="1" data-col="0" data-row="0"></div>
-            <div class="dice-cell" data-player="1" data-col="1" data-row="0"></div>
-            <div class="dice-cell" data-player="1" data-col="2" data-row="0"></div>
-            <div class="dice-cell" data-player="1" data-col="0" data-row="1"></div>
-            <div class="dice-cell" data-player="1" data-col="1" data-row="1"></div>
-            <div class="dice-cell" data-player="1" data-col="2" data-row="1"></div>
-            <div class="dice-cell" data-player="1" data-col="0" data-row="2"></div>
-            <div class="dice-cell" data-player="1" data-col="1" data-row="2"></div>
-            <div class="dice-cell" data-player="1" data-col="2" data-row="2"></div>
-          </div>
-          <div class="text-center">
-            <small class="column-score" id="col-1-0"></small>
-            <small class="column-score" id="col-1-1"></small>
-            <small class="column-score" id="col-1-2"></small>
-          </div>
+    <!-- Поля игроков -->
+    <div class="row justify-content-center gap-4">
+      <!-- Поле Игрока 1 -->
+      <div class="col-md-4">
+        <div class="player-info">
+          <h4>Игрок 1</h4>
+          <p>Очки: <span id="score-1">0</span></p>
         </div>
-
-        <!-- Поле Игрока 2 -->
-        <div class="col-md-4">
-          <div class="player-info">
-            <h4>Игрок 2</h4>
-            <p>Очки: <span id="score-2">0</span></p>
-          </div>
-          <div class="board" id="board-2">
-            <div class="dice-cell" data-player="2" data-col="0" data-row="0"></div>
-            <div class="dice-cell" data-player="2" data-col="1" data-row="0"></div>
-            <div class="dice-cell" data-player="2" data-col="2" data-row="0"></div>
-            <div class="dice-cell" data-player="2" data-col="0" data-row="1"></div>
-            <div class="dice-cell" data-player="2" data-col="1" data-row="1"></div>
-            <div class="dice-cell" data-player="2" data-col="2" data-row="1"></div>
-            <div class="dice-cell" data-player="2" data-col="0" data-row="2"></div>
-            <div class="dice-cell" data-player="2" data-col="1" data-row="2"></div>
-            <div class="dice-cell" data-player="2" data-col="2" data-row="2"></div>
-          </div>
-          <div class="text-center">
-            <small class="column-score" id="col-2-0"></small>
-            <small class="column-score" id="col-2-1"></small>
-            <small class="column-score" id="col-2-2"></small>
-          </div>
+        <div class="board" id="board-1">
+          <div class="dice-cell" data-player="1" data-col="0" data-row="0"></div>
+          <div class="dice-cell" data-player="1" data-col="1" data-row="0"></div>
+          <div class="dice-cell" data-player="1" data-col="2" data-row="0"></div>
+          <div class="dice-cell" data-player="1" data-col="0" data-row="1"></div>
+          <div class="dice-cell" data-player="1" data-col="1" data-row="1"></div>
+          <div class="dice-cell" data-player="1" data-col="2" data-row="1"></div>
+          <div class="dice-cell" data-player="1" data-col="0" data-row="2"></div>
+          <div class="dice-cell" data-player="1" data-col="1" data-row="2"></div>
+          <div class="dice-cell" data-player="1" data-col="2" data-row="2"></div>
+        </div>
+        <div class="text-center">
+          <small class="column-score" id="col-1-0"></small>
+          <small class="column-score" id="col-1-1"></small>
+          <small class="column-score" id="col-1-2"></small>
         </div>
       </div>
 
-      <!-- Сброс -->
-      <div class="text-center mt-4">
-        <button class="btn btn-warning btn-lg" id="reset-btn">Начать заново</button>
+      <!-- Поле Игрока 2 -->
+      <div class="col-md-4">
+        <div class="player-info">
+          <h4>Игрок 2</h4>
+          <p>Очки: <span id="score-2">0</span></p>
+        </div>
+        <div class="board" id="board-2">
+          <div class="dice-cell" data-player="2" data-col="0" data-row="0"></div>
+          <div class="dice-cell" data-player="2" data-col="1" data-row="0"></div>
+          <div class="dice-cell" data-player="2" data-col="2" data-row="0"></div>
+          <div class="dice-cell" data-player="2" data-col="0" data-row="1"></div>
+          <div class="dice-cell" data-player="2" data-col="1" data-row="1"></div>
+          <div class="dice-cell" data-player="2" data-col="2" data-row="1"></div>
+          <div class="dice-cell" data-player="2" data-col="0" data-row="2"></div>
+          <div class="dice-cell" data-player="2" data-col="1" data-row="2"></div>
+          <div class="dice-cell" data-player="2" data-col="2" data-row="2"></div>
+        </div>
+        <div class="text-center">
+          <small class="column-score" id="col-2-0"></small>
+          <small class="column-score" id="col-2-1"></small>
+          <small class="column-score" id="col-2-2"></small>
+        </div>
       </div>
     </div>
 
-    <!-- Ползунок зума -->
-    <div class="zoom-controls">
-      <label for="zoom-slider">Масштаб:</label>
-      <input type="range" id="zoom-slider" min="50" max="150" value="100" step="10" />
-      <span class="zoom-value" id="zoom-value">100%</span>
+    <!-- Сброс -->
+    <div class="text-center mt-4">
+      <button class="btn btn-warning btn-lg" id="reset-btn">Начать заново</button>
     </div>
   </div>
 
@@ -180,36 +263,18 @@
     const score2 = document.getElementById('score-2');
     const resetButton = document.getElementById('reset-btn');
 
-    // Элементы для зума
-    const gameContainer = document.getElementById('game-container');
-    const zoomSlider = document.getElementById('zoom-slider');
-    const zoomValue = document.getElementById('zoom-value');
-
-    // Установка начального масштаба
-    let currentZoom = 100;
-    gameContainer.style.transform = `scale(${currentZoom / 100})`;
-
-    // Обновление масштаба
-    function updateZoom() {
-      currentZoom = parseInt(zoomSlider.value);
-      zoomValue.textContent = `${currentZoom}%`;
-      gameContainer.style.transform = `scale(${currentZoom / 100})`;
-      // Центрирование при масштабировании
-      document.querySelector('.container').style.setProperty('--scale', currentZoom / 100);
-    }
-
-    zoomSlider.addEventListener('input', updateZoom);
-
     // Бросок кубика
     rollButton.addEventListener('click', () => {
       if (isGameOver()) return;
 
       diceValue = Math.floor(Math.random() * 6) + 1;
       diceElement.textContent = diceValue;
+      diceElement.classList.add('animate');
+      setTimeout(() => diceElement.classList.remove('animate'), 300);
       rollButton.disabled = true;
     });
 
-    // Обработка клика по ячейке — игрок выбирает столбец
+    // Обработка клика по ячейке
     document.querySelectorAll('.dice-cell').forEach(cell => {
       cell.addEventListener('click', () => {
         if (diceValue === null || rollButton.disabled === false) return;
@@ -238,19 +303,24 @@
 
         if (!targetCell) return;
 
-        // Установить значение
+        // Установить значение с анимацией
         targetCell.textContent = diceValue;
-        targetCell.classList.add('filled');
-        targetCell.style.backgroundColor = currentPlayer === 1 ? '#d1ecf1' : '#f8d7da';
+        targetCell.classList.add('filled', 'animate');
+        targetCell.style.backgroundColor = '#490404';
+        targetCell.style.color = 'white';
 
         // Удалить все кости такого же значения в противоположном столбце
         const opponent = currentPlayer === 1 ? 2 : 1;
         const opponentCells = document.querySelectorAll(`.dice-cell[data-player="${opponent}"][data-col="${col}"]`);
         opponentCells.forEach(opCell => {
           if (opCell.textContent == diceValue) {
-            opCell.textContent = '';
-            opCell.classList.remove('filled');
-            opCell.style.backgroundColor = '';
+            opCell.classList.add('remove-animation');
+            setTimeout(() => {
+              opCell.textContent = '';
+              opCell.classList.remove('filled', 'remove-animation');
+              opCell.style.backgroundColor = '';
+              opCell.style.color = '';
+            }, 400);
           }
         });
 
@@ -348,8 +418,9 @@
     resetButton.addEventListener('click', () => {
       document.querySelectorAll('.dice-cell').forEach(cell => {
         cell.textContent = '';
-        cell.classList.remove('filled');
+        cell.classList.remove('filled', 'animate', 'remove-animation');
         cell.style.backgroundColor = '';
+        cell.style.color = '';
       });
       document.querySelectorAll('.column-score').forEach(el => el.textContent = '');
 
@@ -361,9 +432,6 @@
       score1.textContent = '0';
       score2.textContent = '0';
     });
-
-    // Инициализация зума
-    updateZoom();
   </script>
 </body>
 </html>
