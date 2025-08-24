@@ -60,11 +60,38 @@
     .dice-display.animate {
       animation: pulse 0.8s ease-in-out;
     }
-    
-    .img {
-      style="width: 64px;"
-    }
 
+
+    .dice-display {
+  width: 64px;
+  height: 64px;
+  margin: 20px auto;
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  background-color: var(--surface);
+  box-shadow: 0 4px 10px rgba(139, 111, 80, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.dice-display img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* или 'cover', если хочешь заполнить полностью */
+  pointer-events: none;
+}
+
+.dice-display::after {
+  content: attr(data-text);
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--text-deep);
+  display: block;
+}
+    
     @keyframes pulse {
       0%, 100% { transform: scale(1); }
       50% { transform: scale(1.1); }
@@ -207,7 +234,7 @@
     <!-- Текущий ход -->
     <div class="text-center mb-4">
       <p class="current-player" id="current-player">Ход: Игрок 1</p>
-      <div class="dice-display" style="width: 64px;" id="dice">?</div>
+      <div class="dice-display" id="dice" data-text="?"></div>
       <button class="btn btn-success btn-lg mt-2" id="roll-btn">Бросить кубик</button>
     </div>
 
@@ -290,10 +317,20 @@
     // Бросок кубика
     rollButton.addEventListener('click', () => {
       if (isGameOver()) return;
-
+    
       diceValue = Math.floor(Math.random() * 6) + 1;
+      
+      // Очищаем контейнер
       diceElement.innerHTML = '';
-      diceElement.appendChild(createDiceImage(diceValue));
+      diceElement.removeAttribute('data-text'); // Убираем текст-заглушку
+    
+      // Создаём изображение
+      const img = document.createElement('img');
+      img.src = `img_${diceValue}.png`;
+      img.alt = `Кубик ${diceValue}`;
+      img.draggable = false;
+      
+      diceElement.appendChild(img);
       diceElement.classList.add('animate');
       setTimeout(() => diceElement.classList.remove('animate'), 300);
       rollButton.disabled = true;
