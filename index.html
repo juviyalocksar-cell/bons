@@ -44,6 +44,12 @@
       color: var(--red-light);
       text-shadow: 0 0 10px rgba(205, 24, 20, 0.7);
       transition: all 0.3s ease;
+      width: 80px;
+      height: 80px;
+      margin: 20px auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .dice-display.animate {
@@ -87,8 +93,6 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.8rem;
-      font-weight: bold;
       border: 2px solid var(--border);
       border-radius: 10px;
       background-color: var(--dark-secondary);
@@ -100,6 +104,13 @@
       box-shadow: inset 0 0 0 1px rgba(0,0,0,0.3);
     }
 
+    .dice-cell img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+    }
+
     .dice-cell:hover:not(.filled) {
       background-color: #3b0707;
       transform: scale(1.05);
@@ -109,7 +120,6 @@
     .dice-cell.filled {
       background-color: var(--red-dark);
       border-color: var(--red-medium);
-      color: white;
       box-shadow: 0 0 15px rgba(205, 24, 20, 0.5);
       transform: scale(1.02);
     }
@@ -160,10 +170,6 @@
     .current-player {
       color: var(--red-light);
       font-size: 1.1rem;
-    }
-
-    .btn-custom {
-      margin: 10px;
     }
 
     /* Эффект "удаление" */
@@ -263,12 +269,22 @@
     const score2 = document.getElementById('score-2');
     const resetButton = document.getElementById('reset-btn');
 
+    // Функция для создания img-элемента
+    function createDiceImage(value) {
+      const img = document.createElement('img');
+      img.src = `img_${value}.png`;  // ← здесь путь к изображениям
+      img.alt = `Кубик ${value}`;
+      img.draggable = false;
+      return img;
+    }
+
     // Бросок кубика
     rollButton.addEventListener('click', () => {
       if (isGameOver()) return;
 
       diceValue = Math.floor(Math.random() * 6) + 1;
-      diceElement.textContent = diceValue;
+      diceElement.innerHTML = '';
+      diceElement.appendChild(createDiceImage(diceValue));
       diceElement.classList.add('animate');
       setTimeout(() => diceElement.classList.remove('animate'), 300);
       rollButton.disabled = true;
@@ -303,23 +319,22 @@
 
         if (!targetCell) return;
 
-        // Установить значение с анимацией
-        targetCell.textContent = diceValue;
+        // Очистить ячейку и вставить изображение
+        targetCell.innerHTML = '';
+        targetCell.appendChild(createDiceImage(diceValue));
         targetCell.classList.add('filled', 'animate');
         targetCell.style.backgroundColor = '#490404';
-        targetCell.style.color = 'white';
 
         // Удалить все кости такого же значения в противоположном столбце
         const opponent = currentPlayer === 1 ? 2 : 1;
         const opponentCells = document.querySelectorAll(`.dice-cell[data-player="${opponent}"][data-col="${col}"]`);
         opponentCells.forEach(opCell => {
-          if (opCell.textContent == diceValue) {
+          if (opCell.querySelector('img') && opCell.querySelector('img').src.includes(`img_${diceValue}.png`)) {
             opCell.classList.add('remove-animation');
             setTimeout(() => {
-              opCell.textContent = '';
+              opCell.innerHTML = '';
               opCell.classList.remove('filled', 'remove-animation');
               opCell.style.backgroundColor = '';
-              opCell.style.color = '';
             }, 400);
           }
         });
@@ -327,7 +342,7 @@
         // Переключение игрока
         currentPlayer = opponent;
         currentPlayerDisplay.textContent = `Ход: Игрок ${currentPlayer}`;
-        diceElement.textContent = '?';
+        diceElement.innerHTML = '?';
         diceValue = null;
         rollButton.disabled = false;
 
@@ -356,7 +371,14 @@
       for (let col = 0; col < 3; col++) {
         // Столбец Игрока 1
         const cells1 = Array.from(document.querySelectorAll(`.dice-cell[data-player="1"][data-col="${col}"]`))
-          .map(c => c.textContent ? parseInt(c.textContent) : 0)
+          .map(c => {
+            const img = c.querySelector('img');
+            if (img) {
+              const match = img.src.match(/img_(\d)\.png/);
+              return match ? parseInt(match[1]) : 0;
+            }
+            return 0;
+          })
           .filter(val => val > 0);
 
         const score1Col = calculateColumnScore(cells1);
@@ -365,7 +387,14 @@
 
         // Столбец Игрока 2
         const cells2 = Array.from(document.querySelectorAll(`.dice-cell[data-player="2"][data-col="${col}"]`))
-          .map(c => c.textContent ? parseInt(c.textContent) : 0)
+          .map(c => {
+            const img = c.querySelector('img');
+            if (img) {
+              const match = img.src.match(/img_(\d)\.png/);
+              return match ? parseInt(match[1]) : 0;
+            }
+            return 0;
+          })
           .filter(val => val > 0);
 
         const score2Col = calculateColumnScore(cells2);
@@ -417,14 +446,13 @@
     // Сброс игры
     resetButton.addEventListener('click', () => {
       document.querySelectorAll('.dice-cell').forEach(cell => {
-        cell.textContent = '';
+        cell.innerHTML = '';
         cell.classList.remove('filled', 'animate', 'remove-animation');
         cell.style.backgroundColor = '';
-        cell.style.color = '';
       });
       document.querySelectorAll('.column-score').forEach(el => el.textContent = '');
 
-      diceElement.textContent = '?';
+      diceElement.innerHTML = '?';
       currentPlayer = 1;
       currentPlayerDisplay.textContent = 'Ход: Игрок 1';
       rollButton.disabled = false;
