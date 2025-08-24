@@ -54,6 +54,41 @@
       color: #6c757d;
       margin-top: -8px;
     }
+
+    /* Контейнер для масштабирования */
+    #game-container {
+      transform-origin: top center;
+      transition: transform 0.2s ease;
+      display: inline-block;
+      margin: 0 auto;
+    }
+
+    /* Ползунок зума */
+    .zoom-controls {
+      text-align: center;
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #f8f9fa;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .zoom-controls label {
+      margin-right: 10px;
+      font-weight: bold;
+    }
+
+    .zoom-controls input[type="range"] {
+      width: 200px;
+      vertical-align: middle;
+    }
+
+    .zoom-value {
+      display: inline-block;
+      width: 50px;
+      font-weight: bold;
+      color: #007bff;
+    }
   </style>
 </head>
 <body class="bg-light">
@@ -61,67 +96,77 @@
   <div class="container py-5">
     <h1 class="text-center mb-4">🎲 Игра в кости — 2 игрока</h1>
 
-    <!-- Текущий ход -->
-    <div class="text-center mb-4">
-      <p class="current-player" id="current-player">Ход: Игрок 1</p>
-      <div class="dice-display" id="dice">?</div>
-      <button class="btn btn-success btn-lg mt-2" id="roll-btn">Бросить кубик</button>
-    </div>
+    <!-- Контейнер с масштабируемым содержимым -->
+    <div id="game-container">
+      <!-- Текущий ход -->
+      <div class="text-center mb-4">
+        <p class="current-player" id="current-player">Ход: Игрок 1</p>
+        <div class="dice-display" id="dice">?</div>
+        <button class="btn btn-success btn-lg mt-2" id="roll-btn">Бросить кубик</button>
+      </div>
 
-    <!-- Поля игроков -->
-    <div class="row justify-content-center gap-4">
-      <!-- Поле Игрока 1 -->
-      <div class="col-md-4">
-        <div class="player-info">
-          <h4>Игрок 1</h4>
-          <p>Очки: <span id="score-1">0</span></p>
+      <!-- Поля игроков -->
+      <div class="row justify-content-center gap-4">
+        <!-- Поле Игрока 1 -->
+        <div class="col-md-4">
+          <div class="player-info">
+            <h4>Игрок 1</h4>
+            <p>Очки: <span id="score-1">0</span></p>
+          </div>
+          <div class="board" id="board-1">
+            <div class="dice-cell" data-player="1" data-col="0" data-row="0"></div>
+            <div class="dice-cell" data-player="1" data-col="1" data-row="0"></div>
+            <div class="dice-cell" data-player="1" data-col="2" data-row="0"></div>
+            <div class="dice-cell" data-player="1" data-col="0" data-row="1"></div>
+            <div class="dice-cell" data-player="1" data-col="1" data-row="1"></div>
+            <div class="dice-cell" data-player="1" data-col="2" data-row="1"></div>
+            <div class="dice-cell" data-player="1" data-col="0" data-row="2"></div>
+            <div class="dice-cell" data-player="1" data-col="1" data-row="2"></div>
+            <div class="dice-cell" data-player="1" data-col="2" data-row="2"></div>
+          </div>
+          <div class="text-center">
+            <small class="column-score" id="col-1-0"></small>
+            <small class="column-score" id="col-1-1"></small>
+            <small class="column-score" id="col-1-2"></small>
+          </div>
         </div>
-        <div class="board" id="board-1">
-          <div class="dice-cell" data-player="1" data-col="0" data-row="0"></div>
-          <div class="dice-cell" data-player="1" data-col="1" data-row="0"></div>
-          <div class="dice-cell" data-player="1" data-col="2" data-row="0"></div>
-          <div class="dice-cell" data-player="1" data-col="0" data-row="1"></div>
-          <div class="dice-cell" data-player="1" data-col="1" data-row="1"></div>
-          <div class="dice-cell" data-player="1" data-col="2" data-row="1"></div>
-          <div class="dice-cell" data-player="1" data-col="0" data-row="2"></div>
-          <div class="dice-cell" data-player="1" data-col="1" data-row="2"></div>
-          <div class="dice-cell" data-player="1" data-col="2" data-row="2"></div>
-        </div>
-        <div class="text-center">
-          <small class="column-score" id="col-1-0"></small>
-          <small class="column-score" id="col-1-1"></small>
-          <small class="column-score" id="col-1-2"></small>
+
+        <!-- Поле Игрока 2 -->
+        <div class="col-md-4">
+          <div class="player-info">
+            <h4>Игрок 2</h4>
+            <p>Очки: <span id="score-2">0</span></p>
+          </div>
+          <div class="board" id="board-2">
+            <div class="dice-cell" data-player="2" data-col="0" data-row="0"></div>
+            <div class="dice-cell" data-player="2" data-col="1" data-row="0"></div>
+            <div class="dice-cell" data-player="2" data-col="2" data-row="0"></div>
+            <div class="dice-cell" data-player="2" data-col="0" data-row="1"></div>
+            <div class="dice-cell" data-player="2" data-col="1" data-row="1"></div>
+            <div class="dice-cell" data-player="2" data-col="2" data-row="1"></div>
+            <div class="dice-cell" data-player="2" data-col="0" data-row="2"></div>
+            <div class="dice-cell" data-player="2" data-col="1" data-row="2"></div>
+            <div class="dice-cell" data-player="2" data-col="2" data-row="2"></div>
+          </div>
+          <div class="text-center">
+            <small class="column-score" id="col-2-0"></small>
+            <small class="column-score" id="col-2-1"></small>
+            <small class="column-score" id="col-2-2"></small>
+          </div>
         </div>
       </div>
 
-      <!-- Поле Игрока 2 -->
-      <div class="col-md-4">
-        <div class="player-info">
-          <h4>Игрок 2</h4>
-          <p>Очки: <span id="score-2">0</span></p>
-        </div>
-        <div class="board" id="board-2">
-          <div class="dice-cell" data-player="2" data-col="0" data-row="0"></div>
-          <div class="dice-cell" data-player="2" data-col="1" data-row="0"></div>
-          <div class="dice-cell" data-player="2" data-col="2" data-row="0"></div>
-          <div class="dice-cell" data-player="2" data-col="0" data-row="1"></div>
-          <div class="dice-cell" data-player="2" data-col="1" data-row="1"></div>
-          <div class="dice-cell" data-player="2" data-col="2" data-row="1"></div>
-          <div class="dice-cell" data-player="2" data-col="0" data-row="2"></div>
-          <div class="dice-cell" data-player="2" data-col="1" data-row="2"></div>
-          <div class="dice-cell" data-player="2" data-col="2" data-row="2"></div>
-        </div>
-        <div class="text-center">
-          <small class="column-score" id="col-2-0"></small>
-          <small class="column-score" id="col-2-1"></small>
-          <small class="column-score" id="col-2-2"></small>
-        </div>
+      <!-- Сброс -->
+      <div class="text-center mt-4">
+        <button class="btn btn-warning btn-lg" id="reset-btn">Начать заново</button>
       </div>
     </div>
 
-    <!-- Сброс -->
-    <div class="text-center mt-4">
-      <button class="btn btn-warning btn-lg" id="reset-btn">Начать заново</button>
+    <!-- Ползунок зума -->
+    <div class="zoom-controls">
+      <label for="zoom-slider">Масштаб:</label>
+      <input type="range" id="zoom-slider" min="50" max="150" value="100" step="10" />
+      <span class="zoom-value" id="zoom-value">100%</span>
     </div>
   </div>
 
@@ -135,6 +180,26 @@
     const score2 = document.getElementById('score-2');
     const resetButton = document.getElementById('reset-btn');
 
+    // Элементы для зума
+    const gameContainer = document.getElementById('game-container');
+    const zoomSlider = document.getElementById('zoom-slider');
+    const zoomValue = document.getElementById('zoom-value');
+
+    // Установка начального масштаба
+    let currentZoom = 100;
+    gameContainer.style.transform = `scale(${currentZoom / 100})`;
+
+    // Обновление масштаба
+    function updateZoom() {
+      currentZoom = parseInt(zoomSlider.value);
+      zoomValue.textContent = `${currentZoom}%`;
+      gameContainer.style.transform = `scale(${currentZoom / 100})`;
+      // Центрирование при масштабировании
+      document.querySelector('.container').style.setProperty('--scale', currentZoom / 100);
+    }
+
+    zoomSlider.addEventListener('input', updateZoom);
+
     // Бросок кубика
     rollButton.addEventListener('click', () => {
       if (isGameOver()) return;
@@ -144,7 +209,7 @@
       rollButton.disabled = true;
     });
 
-    // Обработка клика по ячейке — игрок выбирает **столбец** (любая ячейка в столбце)
+    // Обработка клика по ячейке — игрок выбирает столбец
     document.querySelectorAll('.dice-cell').forEach(cell => {
       cell.addEventListener('click', () => {
         if (diceValue === null || rollButton.disabled === false) return;
@@ -265,7 +330,7 @@
       return total;
     }
 
-    // Проверка, заполнена ли доска (все 3 столбца имеют по 3 кости)
+    // Проверка, заполнена ли доска
     function isBoardFull(player) {
       for (let col = 0; col < 3; col++) {
         const cells = document.querySelectorAll(`.dice-cell[data-player="${player}"][data-col="${col}"].filled`);
@@ -296,6 +361,9 @@
       score1.textContent = '0';
       score2.textContent = '0';
     });
+
+    // Инициализация зума
+    updateZoom();
   </script>
 </body>
 </html>
